@@ -1,0 +1,429 @@
+---
+title: "Climate Exercise"
+author: "Carl Boettiger & Dana Seidel"
+output: github_document
+---
+
+
+
+# Unit I: Climate Change Module
+
+## Warm-up exercise: Examining CO2 trends in R
+
+- Example from <http://climate.nasa.gov/vital-signs/carbon-dioxide/>
+- Raw data from <ftp://aftp.cmdl.noaa.gov/products/trends/co2/co2_mm_mlo.txt>
+
+```{r message=FALSE}
+library(tidyverse)
+library(zoo)
+library(gridExtra)
+```
+
+We will look at the dataset for Carbon Dioxide, an important Greenhouse gas (heat-trapping gas) that contributes to global warming. Below is the data read in as a table.
+```{r message=FALSE}
+if(!file.exists("co2_mm_mlo.txt"))
+  download.file("ftp://aftp.cmdl.noaa.gov/products/trends/co2/co2_mm_mlo.txt",
+            "co2_mm_mlo.txt")
+co2 <- 
+read_table("co2_mm_mlo.txt",
+                  comment="#",
+                  col_names = c("year", "month", "decimal_date", "average",
+                                "interpolated", "trend"),
+                  na = c("-1", "-99.99"))
+co2
+```
+There are time series of the Co2 level in `part per million (ppm) unit. The first 3 columns store time series data, the last 3 store the ppm values of Co2 which is calculated differently by [NOAA](https://www.noaa.gov/climate).
+
+Lets' look at a visualization of Co2 calculated using average, interpolated and trend.
+
+```{r}
+co2 %>% 
+  gather(series, co2_conc, average, interpolated, trend) %>%
+  ggplot(aes(x = decimal_date, y = co2_conc, col = series)) +
+  geom_line() +
+  facet_wrap(~ series) +
+  theme_light() +
+  labs(title = 'Carbon Dioxide',
+         x = 'Time',
+         y = 'Co2 ppm') +
+  theme(text = element_text(size=12))
+
+```
+
+Notice that we have the same upward trending line in ppm over time. This similarity among the 3 series, with different calculated values for Co2 is indicating an increase in Co2 levels.   
+Lets' look at Average and Trend Co2 data in one graph.
+
+```{r}
+co2 %>% 
+  ggplot(aes(x = decimal_date)) + 
+  geom_line(aes(y = trend, col = "Trend"), lwd = 1.5, lty = 1) +
+  geom_line(aes(y = average,  col = "Average")) +
+  theme_minimal() +
+  labs(title = 'Carbon Dioxide',
+         x = 'Time',
+         y = 'Co2 ppm') +
+  theme(text = element_text(size=16))
+```
+
+
+We observe that the Spring and Summer months have the minimum value of CO2 and Winter months have the maximum. This is because in Spring and Summer in the Northern Hemisphere where the majority of vegetation is, the seasonal influx of sunlight allows more photosynthesis for plants, which absorb more the CO2, reducing the CO2 in the atmosphere. In the Winter however, there is less sun and plants receive less sunlight, reducing their ability to phototsynthesize and therefore their CO2 uptake.
+
+We want to know what rolling average is used in computing the "trend" line and how does the trend depend on the rolling average.
+The rolling average is the monthly mean from daily averages minus the seasonal cycle. The trend is determined by the rolling average after removing the seasonal cycle of a 7-year window around each monthly value. We don't know if the value is a left, center or right aligned in the calculation. Removing the seasonal cycle will allow the values to be smoothed out, the trend line will appear somewhere in the middle of the original up and down of monthly values based on seasonality, the result is an upward trend in CO2 value over the years.
+
+------------------------
+
+# Exercise I: Temperature Data
+
+Each of the last years has consecutively set new records on global climate.  In this section we will analyze global mean temperature data.
+
+Data from: <http://climate.nasa.gov/vital-signs/global-temperature>
+
+Lets' read in the raw data for Global Temperature Mean Estimate.
+
+```{r}
+temp <-
+read_table("https://data.giss.nasa.gov/gistemp/graphs/graph_data/Global_Mean_Estimates_based_on_Land_and_Ocean_Data/graph.txt", 
+           col_names = c("Year", "No_Smoothing", "Lowess(5)"),
+           skip = 5
+           )
+temp
+```
+
+```{r}
+#renaming the column Lowess(5) for easier manipulation
+colnames(temp)[colnames(temp)=="Lowess(5)"] <- "Smoothed_Temperature_Anomaly"
+```
+
+## Question 1:
+
+There are 3 columns in this dataset:
+
+1. the first denotes the year from 1880 to 2018
+2. the second denotes the actual temperature change in Celcius without smoothing or removing the noise from seasonality.
+3. the third denotes the mean or average, smoothed temperature change in Celcius. 
+
+Based on Goddard Institute for Space Studies, the measurements are made by GHCN v4: meterological stations and ERSST v5: ocean data from ships, buoys, as well as other related sensors. These records helped in deriving an estimate of global surface temperature change or known as [GISTEMP](https://data.giss.nasa.gov/gistemp/). The estimate indicates a warming of 0.5-0.7 Celcius that appears more global recently versus more warming in high northern latitudes in earlier years 1940s.
+Associated measurement uncertainties include incomplete spatial coverage of measurements, factors such as urban warming near the meterological stations,
+The tables and graphs of the dataset are updated monthly, according to [Hansen and Lebedeff 1987](https://pubs.giss.nasa.gov/docs/1987/1987_Hansen_ha00700d.pdf), the data set also changes when additional stations are added and errors in existing stations are corrected. The stations are located on island and continental locations. There are no missing values. This is check using the code `is.na(temp_original)`. If they is a missing value however, then that value could be interpolated, or noted and accounted for during calculations, such as when calculating the mean global temperature change. 
+
+Lets' get a look at the Smoothed Temperature Anomaly or another word rolling average of 5 years.
+
+```{r}
+ggplot(temp) + 
+  geom_line(aes(x = Year, y = Smoothed_Temperature_Anomaly), color="red", lwd=2) +
+  theme_classic() +
+  labs(title = 'Global Temperature',
+         y = 'Smoothed Temperature Anomaly (C)') +
+  theme(text = element_text(size=16)) 
+```
+
+Here is a simple graph of global temperature without smoothing.
+
+```{r}
+ggplot(temp) + 
+  geom_line(aes(x = Year, y = No_Smoothing), color="red", lwd=2) +
+  theme_classic() +
+  labs(title = 'Global Temperature',
+         y = 'No_Smoothing') +
+  theme(text = element_text(size=16)) 
+  
+```
+
+What we observe here is the noise of the seasonality where the Northen Hemisphere vegetation is absorbing more Co2 during the Spring and Summer. Scientists therefore have tried to smooth out this noise by calculating the rolling averages. We will get into this in later exercises.
+
+## Question 2:
+
+Construct the necessary R code to import and prepare for manipulation the following data set: <http://climate.nasa.gov/system/internal_resources/details/original/647_Global_Temperature_Data_File.txt>
+
+Lets' read in the original global temperature data with the same column names.
+```{r}
+temp_original <-
+read_table("http://climate.nasa.gov/system/internal_resources/details/original/647_Global_Temperature_Data_File.txt",
+            col_names = c("Year", "No_Smoothing", "Lowess(5)"),
+            skip = 5
+            )
+temp_original
+```
+
+## Question 3:
+
+Plot the trend in global mean temperatures over time.  Describe what you see in the plot and how you interpret the patterns you observe.
+
+```{r}
+#renaming the column Lowess(5) for easier manipulation
+colnames(temp_original)[colnames(temp_original)=="Lowess(5)"] <- "Smoothed_Temperature_Anomaly"
+```
+
+```{r fig1, fig.height= 5, fig.width= 10}
+
+temp_original %>% ggplot(aes(x = Year)) + 
+  geom_line(aes(y = No_Smoothing, color = "No Smoothing"), lwd = 1.1) + 
+  geom_line(aes(y = Smoothed_Temperature_Anomaly, color = "Smoothed Temperature"), lwd = 1.5) +
+  theme_minimal() +
+  labs(title = 'Global Temperature',
+         y = 'Smoothed Temperature Anomaly (C)') +
+  theme(text = element_text(size=16))
+  
+  
+```
+
+I mapped two lines, one smoothed trend line and one with noise from seasonality. From the trendline, I see a non-linear line with a positive trend going up in the y-axis. This plot is very similar to the estimate of global temperature data set. We still observe the increase in temperature anomaly indicating that the planet is warming up in more recent years. 
+
+## Question 4: Evaluating the evidence for a "Pause" in warming?
+
+> The [2013 IPCC Report](https://www.ipcc.ch/pdf/assessment-report/ar5/wg1/WG1AR5_SummaryVolume_FINAL.pdf) included a tentative observation of a "much smaller increasing trend" in global mean temperatures since 1998 than was observed previously.  This led to much discussion in the media about the existence of a "Pause" or "Hiatus" in global warming rates, as well as much research looking into where the extra heat could have gone.  (Examples discussing this question include articles in [The Guardian](http://www.theguardian.com/environment/2015/jun/04/global-warming-hasnt-paused-study-finds), [BBC News](http://www.bbc.com/news/science-environment-28870988), and [Wikipedia](https://en.wikipedia.org/wiki/Global_warming_hiatus)). 
+
+>By examining the data here, what evidence do you find or not find for such a pause?  Present an analysis of this data (using the tools & methods we have covered in Foundation course so far) to argue your case.  
+
+I'd argue that the "pause" in global warming is not valid because it is created by cherry-picking the time interval where the climate temperature anomaly happened to be lower relative to its neighboring years. For example, we can start examine the so-called "climate hiatus" by looking at side-by-side graph of 1990 to 2015 and another interval 1960 to 1985 where the temperature anomaly is also lower. If we pick out all the dips in temperature on our overall graph, we can say that there is a "pause" in global temperature. However, when we zoom out, all the dips are increasing in temperature. These increasing temperature dips are supporting the fact that in the overall trend, after smoothing out for seasonality, the global warming is still happening. 
+
+```{r}
+plot1 <- temp_original %>% filter(Year %in% (1990:2015)) %>% 
+  ggplot(aes(x = Year)) +
+  geom_line(aes(y = Smoothed_Temperature_Anomaly), color = "yellow", lwd = 2) +
+  theme_dark() +
+  labs(title = 'Global Temperature',
+         y = 'Temperature Anomaly (C)') +
+  theme(text = element_text(size=16))
+
+plot2 <- temp_original %>% filter(Year %in% (1960:1985)) %>% 
+  ggplot(aes(x = Year)) +
+  geom_line(aes(y = Smoothed_Temperature_Anomaly), color = "yellow", lwd = 2) +
+  theme_dark() +
+  labs(title = 'Global Temperature',
+         y = 'Temperature Anomaly (C)') +
+  theme(text = element_text(size=16))
+
+grid.arrange(plot1, plot2, ncol = 2)
+
+```
+
+## Question 5: Rolling averages
+We will explore the rolling averages of global temperature change.
+The "5 year average" is the average of 5 years worth of data, "annual average" is the average value derived from one year worth of data.
+
+Let construct 5 year averages from the annual data.  Construct 10 & 20-year averages. 
+The first method is to use the library Rcpp.
+
+```{r}
+temp_original %>% 
+  mutate(my_5_average = RcppRoll::roll_meanl(No_Smoothing, n=5))
+```
+
+The second method is to use the lirbary zoo.
+
+```{r}
+rolling_averages <- temp_original %>%
+  select(Year, No_Smoothing, Smoothed_Temperature_Anomaly) %>%
+  mutate(rolling_avg_5 = rollmean(No_Smoothing, k = 5, fill = NA)) %>%
+  mutate(rolling_avg_10 = rollmean(No_Smoothing, k = 10, fill = NA)) %>%
+  mutate(rolling_avg_20 = rollmean(No_Smoothing, k = 20, fill = NA))
+rolling_averages
+```
+
+- Plot the different averages and describe what differences you see and why.  
+```{r fig2, fig.height= 6, fig.width= 10}
+rolling_averages %>% ggplot(aes(x = Year)) + 
+  geom_line(aes(y = rolling_avg_5, color = "Rolling Average 5"), lwd = 2, alpha = 0.6) + 
+  geom_line(aes(y = rolling_avg_10, color = "Rolling Average 10"), lwd = 2,alpha = 0.4) +
+  geom_line(aes(y = rolling_avg_20, color = "Rolling Average 20"), lwd = 2, alpha = 0.8) +
+  theme_light() +
+  labs(title = 'Global Temperature',
+         y = 'Rolling Averages') +
+  theme(text = element_text(size=16))
+```
+
+You can see that the rolling averages of 5, 10 and 20 years are of upward trends. However, notice the higher the rolling year is, the smoother the line is. This is because longer time data smooth out the noises of data. Notice that doing so will allow us to see that there is no pause in global warming from 1880 to 2018.
+
+# Exercise II: Melting Ice Sheets?
+
+- Data description: <http://climate.nasa.gov/vital-signs/land-ice/>
+- Raw data file: <http://climate.nasa.gov/system/internal_resources/details/original/499_GRN_ANT_mass_changes.csv>
+
+## Question 1:
+
+We are reading in the csv file to import this data set as a tidy `Table` object.
+
+```{r}
+icesheet <- read_csv('http://climate.nasa.gov/system/internal_resources/details/original/499_GRN_ANT_mass_changes.csv',
+                     skip = 10,
+                     col_names = c("Year", "Greenland_mass", "Antarctica_mass"))
+
+icesheet
+```
+
+Let's make the decimal year more understandable for us.
+```{r}
+#reformat the year column 
+icesheet %>%
+  mutate(exact_date = lubridate::date_decimal(Year))
+```
+
+## Question 2:
+
+The table is displaying data of the Greenland and Antartica ice mass from 2002 to 2013. This data comes from NASA's GRACE satellites, the mass unit is in Gigatonnes, the year is in decimal format with the first four digits representing the year. This dataset is analyzed using [NASA GRACE Data Analysis Tool](https://grace.jpl.nasa.gov/data/data-analysis-tool/) (DAT) which interpolates the data to a 1X1 degree grid resolution. 
+
+## Question 3:
+
+Here is the visualization of the ice mass and trends that we may observe.
+
+```{r fig3, fig.height= 6, fig.width= 10}
+icesheet %>% ggplot(aes(x = Year)) +
+  geom_line(aes(y = Antarctica_mass, color = "Antarctica Mass"), lwd = 1.5) +
+  geom_line(aes(y = Greenland_mass, color = "Greenland Mass"), lwd = 1.5) + 
+  theme_linedraw() +
+  labs(title = "Icesheet Mass Variation Since 2002", 
+       y = "Ice Mass (Gt)") +
+  theme(text = element_text(size=16))
+```
+
+The decrease in ice mass shown here by this graph has been concluded to cause rising sea levels. We can observe that the Greenland ice mass is most recently lower than Antartica from the steeper slope, this is evidence for Northern Hemisphere warming more rapidly in earlier years. For the full story of this report visit [NASA GRACE-FO](https://gracefo.jpl.nasa.gov/news/137/ramp-up-in-antarctic-ice-loss-speeds-sea-level-rise/).
+
+# Exercise III: Rising Sea Levels?
+
+- Data description: <http://climate.nasa.gov/vital-signs/sea-level/>
+- Raw data file: <http://climate.nasa.gov/system/internal_resources/details/original/121_Global_Sea_Level_Data_File.txt>
+
+## Question 1:
+From the [Understand Sea Level page](https://sealevel.nasa.gov/understanding-sea-level/overview), sea level rise is caused by melting ice sheets and glaciers.
+Lets' read in the dataset for Rising Sea Levels as a tidy `Table` object.
+
+```{r}
+sealevel <-
+read_table("http://climate.nasa.gov/system/internal_resources/details/original/121_Global_Sea_Level_Data_File.txt",
+         skip = 44,
+         comment = "HDR",
+         col_names = c("Frequency", "Merged_cycle_number", "Midyear", "Observation", "weighted_observation", "GMSL", "standard deviation", "applied_GMSL", "GMSL_SD", "GMSL_Smoothed", "GLMSL_Smoothed_both"),
+                       na = c("99900.000"))
+sealevel
+```
+
+## Question 2:
+
+This is a dataset of Global Mean Sea Level Data or (GMSL) variations from 1993 to 2016. This data comes from the NASA Goddard Space Flight Center and generated by using the [Integrated Multi-Mission Ocean Altimeter Data for Climate Research](http://podaac.jpl.nasa.gov/dataset/MERGED_TP_J1_OSTM_OST_ALL_V2). It combines Sea Surface Heights of different satellites such are TOPEX/Poseidon, Jason-1 and OSTM/Jason-2. The data is further manipulated with parameters such as range and geophysical corrections, intermission biases to create a consistent dataset throughout time regardless of the instrument active at times. 
+There are 12 columns and 847 rows where missing and bad values are flagged as 99900.000.
+
+1. Altimeter type 0=dual-frequency  999=single frequency (ie Poseidon-1) 
+2. merged file cycle # 
+3. year+fraction of year (mid-cycle) 
+4. number of observations 
+5. number of weighted observations 
+6. GMSL (Global Isostatic Adjustment (GIA) not applied) variation (mm) with respect to TOPEX collinear mean reference 
+7. standard deviation of GMSL (GIA not applied) variation estimate (mm) and 8. smoothed (60-day Gaussian type filter) GMSL (GIA not applied) variation (mm)
+8. GMSL (Global Isostatic Adjustment (GIA) applied) variation (mm) with respect to TOPEX collinear mean reference
+9. standard deviation of GMSL (GIA applied) variation estimate (mm)
+10. smoothed (60-day Gaussian type filter) GMSL (GIA applied) variation (mm)
+11. smoothed (60-day Gaussian type filter) GMSL (GIA applied) variation (mm); annual and semi-annual signal removed
+
+Lets' get the exact data from the decimal date column.
+
+```{r}
+sealevel %>%
+  mutate(exact_date = lubridate::date_decimal(Midyear))
+```
+
+## Question 3:
+
+Plot the data and describe the trends you observe.
+
+```{r fig4, fig.height= 6, fig.width= 10}
+seaplot <- sealevel %>% ggplot(aes(x = Midyear)) +
+  geom_line(aes( y = GLMSL_Smoothed_both), color = "lightblue", lwd = 2) +
+  geom_point(aes(x = 2016, y = 75, color = "2016 GMSL"), size = 4) +
+  theme_light()+
+  labs(title = "Global Mean Sea Level", 
+       y = "Height (mm)") +
+  theme(text = element_text(size=16)) 
+seaplot + scale_x_continuous(name="Year", breaks=seq(1993,2016,5))
+```
+I observed an upward trend in global sea level from 1993 to 2016. The red dot is the sea level for 2016, noting the lastest measurement of this data. There is a consistent oscillating pattern in the overall trendline, similar to the Co2 Keeling Curve in our first warm up exercise. However, here we have the global averaged trend toward rising sea levels and the fluctuations of regional effects seen in the graph above.
+
+# Exercise IV: Longer term trends in CO2 Records
+
+The data we analyzed in the unit introduction included CO2 records dating back only as far as the measurements at the Manua Loa observatory.  To put these values into geological perspective requires looking back much farther than humans have been monitoring atmosopheric CO2 levels.  To do this, we need another approach.
+
+Vostok Core, back to 400,000 yrs before present day 
+
+- Description of data set: <http://cdiac.esd.ornl.gov/trends/co2/vostok.html>
+- Data source: <http://cdiac.ornl.gov/ftp/trends/co2/vostok.icecore.co2>
+
+```{r message=FALSE}
+if(!file.exists("icecore.csv"))
+  download.file("http://cdiac.ornl.gov/ftp/trends/co2/vostok.icecore.co2",
+            "icecore.csv")
+co2_vostok <- read_delim("icecore.csv", skip = 20, comment = "*", delim = "\t", col_names = c("Depth_m", "Age_of_the_ice", "Mean_age_of_the_air", "CO2_concentration_ppmv"))
+
+co2_vostok
+```
+In this table, we have the Depth measurements in meters, the age of the ice and mean age of the air units are in years Before Present or before 1950 and lastly, the Co2 concentration in part per million by volumn. 
+The ice-drilling project between Russia, the United States and France at Vostok station resulted in the depth of 3623m. The ice core entrapped air of the past which allows us to studying the records of past changes in atmospheric composition.  
+Lets' rearrange the dataframe Age of the air column in descending order to see the oldest times.
+
+```{r}
+co2_vostok %>% arrange(desc(Age_of_the_ice))
+```
+
+We can observe here that the oldest age of the ice is 419,328 years old which corresponds to the deepest depth at 3,304 meters.  
+Lets' see the trend over time by plotting the mean age of the air with the CO2 levels.
+
+```{r fig5, fig.height= 6, fig.width= 10}
+co2_vostok %>% ggplot(aes(x = Mean_age_of_the_air)) +
+  geom_line(aes( y = CO2_concentration_ppmv), color = "red", lwd = 2) +
+  theme_light()+
+  labs(title = "Vostok, Antarctica, Ice-core CO2 Record",
+       x = "Age of Entrapped Air (kyr BP)",
+       y = "Co2 Concentration (ppmv)") +
+  theme(text = element_text(size=16)) 
+```
+
+The graph above shows the trend of Co2 levels over a series of time in Earth glacial and interglacial periods. The fluctuations corresponding with these conditions over 4 climate cycles according to the scientists of France and Russia. 
+
+Now, lets' look at Co2 level from both the Mauna Loa measurement and Vostok measurement. We will start by selecting only the columns that we are interested in Vostok to join to Mauna Loa.
+```{r}
+combine_co2 <- 
+  select(co2_vostok, Mean_age_of_the_air, CO2_concentration_ppmv)
+combine_co2
+```
+
+Since the year is BP or before 1950, we will perform a vectorized operation to the mean age of air column and use the add that to our dataframe as adjusted year.
+```{r}
+adjusted_year <- combine_co2$Mean_age_of_the_air + 1950
+combine_co2 <- combine_co2 %>% 
+  mutate(adjusted_year_air = adjusted_year ) %>%
+  select(adjusted_year_air, CO2_concentration_ppmv) %>%
+  rename(year = adjusted_year_air) %>%
+  rename(co2 = CO2_concentration_ppmv)
+combine_co2
+```
+
+Lets' prepare our Mauna Loa Co2 data for joining by selecting only interested columns like year and Co2 levels. Then we will aggregate to find the mean Co2 level per year.
+
+```{r}
+select_co2 <- 
+  co2 %>% select(year, trend)
+select_co2 <- select_co2 %>%
+  group_by(year) %>%
+  summarize(co2 = mean(trend))
+```
+
+Now we are ready to combine the two tables vertically based on their column names.
+```{r}
+vostok_mauna <- rbind(combine_co2, select_co2) %>%
+  arrange(desc(year))
+vostok_mauna
+```
+
+Lets' plot the change of Co2 level over time from Vostok to Mauna Loa.
+```{r fig6, fig.height= 6, fig.width= 10}
+vostok_mauna %>% ggplot(aes(x = year)) +
+  geom_line(aes( y = co2), color = "red", lwd = 2) +
+  theme_bw()+
+  labs(title = "From Vostok to Mauna Co2 Levels",
+       x = "Year",
+       y = "Co2 Concentration (ppmv)") +
+  theme(text = element_text(size=16)) 
+```
+Reading the Co2 level from right to left in time, the present years have the highest and unprecedented co2 level in 4 climatic cycles (natural glacial and interglacial intervals) of Earth history. Co2 as a heat-trapping (greenhouse) gas has been acclerating global warming that has never been seen before. The global warming effect has melted ice sheets and glaciers, causing an rise in sea level. These are the scientific studies in that stand as a proofs to climate change against all climate skeptics.  
+Finally, We need to take action and see what is it that our generation can collaborate together to reduce Co2 by a drastic amount whether that be in reforestation or using recyclable plastics, drive less, etc. We only have one Earth.     
+Lets' protect our home.
