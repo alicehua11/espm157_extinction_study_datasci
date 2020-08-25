@@ -1,0 +1,4 @@
+"0","extinc_year <- map(narrative, function(x){"
+"0","  str_extract_all(x, ""\\d{4}"") %>% "
+"0","  unlist()"
+"0","}) "

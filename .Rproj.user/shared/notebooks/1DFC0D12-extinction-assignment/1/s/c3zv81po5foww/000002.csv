@@ -1,0 +1,5 @@
+"0","all_year <- "
+"0","  extinc_year %>% "
+"0","  map(possibly(bin_year, NA_real_)) %>%"
+"0","  as.integer() %>% "
+"0","  replace_na(1600)"

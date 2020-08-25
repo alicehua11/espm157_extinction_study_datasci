@@ -1,0 +1,5 @@
+"0","total_amount <- length(all_results %>% map_dfr(get_result))"
+"2","
+"
+"2","
+"

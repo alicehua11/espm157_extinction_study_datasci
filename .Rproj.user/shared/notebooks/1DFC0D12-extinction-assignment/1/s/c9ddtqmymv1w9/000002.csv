@@ -1,0 +1,2 @@
+"0","all_species_1 <- all_results  %>% map_dfr(get_result)"
+"0","all_species_1"

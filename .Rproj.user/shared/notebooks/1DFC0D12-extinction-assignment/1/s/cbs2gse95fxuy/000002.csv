@@ -1,0 +1,2 @@
+"0","#apply map to all_pages a vector"
+"0","all_results <- map(all_pages, GET)"

@@ -1,0 +1,2 @@
+"0","all_species <- all_results  %>% map_dfr(get_result) %>% filter(category==""EX""| category==""EW"")"
+"0","all_species"

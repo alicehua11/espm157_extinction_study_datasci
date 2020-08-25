@@ -1,0 +1,3 @@
+"0","all_species_with_year <- all_species %>%"
+"0","  mutate(extinct_year = all_year)"
+"0","all_species_with_year"

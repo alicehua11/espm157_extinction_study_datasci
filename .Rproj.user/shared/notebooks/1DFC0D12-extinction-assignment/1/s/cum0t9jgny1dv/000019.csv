@@ -1,0 +1,7 @@
+"0","master_ex_table <- master_ex_table %>%"
+"0","  left_join(bind_NAs) %>%"
+"0","  mutate(perc_ex_uncertain = (100*(cumsum_lowNA/sum_species)) + perc_ex_noNA) %>%"
+"0","  select(extinct_year, group, sum_species, perc_ex_withNA, perc_ex_noNA, perc_ex_uncertain)"
+"2","Joining, by = c(""extinct_year"", ""group"")
+"
+"0","master_ex_table"

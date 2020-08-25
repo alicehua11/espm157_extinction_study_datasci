@@ -1,0 +1,5 @@
+"0","cat(""The total species of all groups without NA for extinction dates  combined is:"", as.character(sum(nrow(birds_noNa) + nrow(mammals_noNa) + nrow(vertebrate_noNa) + nrow(all_others_noNa))))
+"
+"1","The total species of all groups without NA for extinction dates  combined is:"
+"1"," "
+"1","536"

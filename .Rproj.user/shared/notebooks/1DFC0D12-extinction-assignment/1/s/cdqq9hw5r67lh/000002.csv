@@ -1,0 +1,6 @@
+"0","if (!file.exists(""massive_resp.rds"")){"
+"0","  resp <- map(url, GET)"
+"0","  saveRDS(resp, ""massive_resp.rds"")"
+"0","} else {"
+"0","  all_data <- readRDS(""massive_resp.rds"")"
+"0","}"

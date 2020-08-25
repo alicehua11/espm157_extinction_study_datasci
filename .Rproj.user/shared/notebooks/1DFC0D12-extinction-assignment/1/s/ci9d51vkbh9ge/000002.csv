@@ -1,0 +1,4 @@
+"0","map_chr_na <- possibly(map_chr, as.character(NA))"
+"0",""
+"0","narrative <- all_data %>% map(content) %>% map(""result"") %>% "
+"0","  map(map_chr_na, ""rationale"")"

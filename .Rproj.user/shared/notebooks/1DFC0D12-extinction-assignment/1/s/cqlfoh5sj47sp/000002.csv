@@ -1,0 +1,8 @@
+"0","species_ap <- ""https://apiv3.iucnredlist.org/api/v3/species"""
+"0","page <- ""/page/"""
+"0","page_number <- 0:10"
+"0","query <- ""?token="""
+"0","token <- ""9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee"""
+"0",""
+"0","#write a function to get http, clue everything together to make a url that iterates over the vector of page_number"
+"0","all_pages <- paste0(species_ap, page, page_number, query, token)"

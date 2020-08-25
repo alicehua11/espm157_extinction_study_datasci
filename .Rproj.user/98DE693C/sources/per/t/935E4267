@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1574435307558.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "422079336",
+    "id" : "935E4267",
+    "lastKnownWriteTime" : 1575491877,
+    "last_content_update" : 1575491877681,
+    "path" : "C:/Users/alice/OneDrive/Schools/Berkeley/Fall2019/Rstudio/extinction-quam-hua/assignment/extinction-assignment.Rmd",
+    "project_path" : "assignment/extinction-assignment.Rmd",
+    "properties" : {
+        "cursorPosition" : "174,13",
+        "scrollLine" : "163"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

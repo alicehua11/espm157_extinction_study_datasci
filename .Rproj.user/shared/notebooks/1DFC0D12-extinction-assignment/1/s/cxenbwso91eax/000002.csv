@@ -1,0 +1,8 @@
+"0","all_extinct <- all_species %>% pull(scientific_name)"
+"0",""
+"0","base <- ""https://apiv3.iucnredlist.org"""
+"0","narrative <- ""/api/v3/species/narrative/"""
+"0","name_group1 <- all_extinct"
+"0","query <- ""?token="""
+"0","token <- ""9bb4facb6d23f48efbf424bb05c0c1ef1cf6f468393bc745d42179ac4aca5fee"""
+"0","url <- paste0(base, narrative, name_group1, query, token)"
