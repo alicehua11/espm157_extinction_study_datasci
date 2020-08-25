@@ -1,9 +1,5 @@
 
-This repository is a report on current climate change data completed under the first module of ESPM 157. The report utilizes R library to make visualizations followed by text analysis to understand how the earth's climate is warming. 
-
-## assignment
-
-All work for this assignment is in the `assignment` directory.  Code is contained in the `climate.Rmd` notebook, and final rendered output files (`climate.md` and associated files) are in the `assignment` directory as well. The general rubric you will be graded on is found in the `Rubric.md` file. 
+This repository is a report on current climate change data completed under the first module of ESPM 157. The report utilizes R library to make visualizations followed by text analysis to understand how the earth's climate is warming.  
 
 #### Climate Report
 
