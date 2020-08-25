@@ -1,6 +1,4 @@
 
-[![Build Status](https://travis-ci.com/espm-157/climate-alicehua11.svg?token=7gSxV1VqqHz7TUXHHWGp&branch=master)](https://travis-ci.com/espm-157/climate-alicehua11)
-
 This repository is a report on current climate change data completed under the first module of ESPM 157. The report utilizes R library to make visualizations followed by text analysis to understand how the earth's climate is warming. 
 
 ## assignment
